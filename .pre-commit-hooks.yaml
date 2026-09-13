@@ -1,0 +1,7 @@
+- id: contract-guard
+  name: ContractGuard (OpenAPI Drift Detector)
+  description: Detects breaking changes and schema drift in OpenAPI specifications.
+  entry: contract-guard git-diff --base-ref origin/main
+  language: python
+  files: ^(openapi|swagger)\.(json|yaml|yml)$
+  pass_filenames: false

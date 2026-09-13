@@ -4,6 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Zero External APIs](https://img.shields.io/badge/API%20Keys-0%20Required-success.svg)](#)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker&logoColor=white)](https://www.docker.com/)
 
 > **Zero-Dependency OpenAPI Breaking Change & Schema Drift Detector for GitHub Actions & CI/CD.**  
 > Prevent production outages and broken mobile/web clients by catching API contract breaking changes on Pull Requests before they merge.
@@ -123,6 +125,33 @@ contract_guard/
 ├── rules.py        # Breaking vs Additive classification rules
 ├── reporter.py     # Terminal ANSI, GitHub PR Markdown, and SARIF generators
 └── git_utils.py    # Zero-checkout Git history spec extractor
+```
+
+---
+
+## 🪝 Pre-Commit Hook Integration
+
+Catch API contract breaks before files are even committed to git:
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/tusharjamunkar/contract-guard
+    rev: v1.0.0
+    hooks:
+      - id: contract-guard
+        args: ["--spec-path", "openapi.json", "--base-ref", "origin/main"]
+```
+
+---
+
+## 🐳 Docker Usage (GitLab CI, Jenkins, Bitbucket)
+
+Run ContractGuard in any containerized environment without installing Python:
+
+```bash
+docker build -t contract-guard .
+docker run --rm -v $(pwd):/workspace -w /workspace contract-guard diff --base v1.json --head v2.json
 ```
 
 ---
