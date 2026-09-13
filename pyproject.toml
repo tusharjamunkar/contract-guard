@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "contract-guard"
+version = "0.1.0"
+description = "Zero-API Automated OpenAPI Breaking Change & Schema Drift Detector for GitHub Actions & CI"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "Tushar Jamunkar", email = "tusharjamunkar569@gmail.com" }
+]
+requires-python = ">=3.9"
+dependencies = []
+[project.optional-dependencies]
+yaml = ["pyyaml>=6.0"]
+dev = ["pytest>=8.0", "pytest-cov>=4.0"]
+
+
+[project.scripts]
+contractguard = "contract_guard.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+

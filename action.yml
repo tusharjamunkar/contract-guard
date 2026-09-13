@@ -1,0 +1,60 @@
+name: "ContractGuard - API Breaking Change Detector"
+description: "Detects breaking API changes & OpenAPI contract drift on Pull Requests with 0 paid external APIs"
+author: "Tushar Jamunkar"
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  spec-path:
+    description: "Path to the OpenAPI / Swagger file in the repository (e.g. openapi.json or openapi.yaml)"
+    required: true
+    default: "openapi.json"
+  base-ref:
+    description: "Git reference to compare against (default: origin/main)"
+    required: false
+    default: "origin/main"
+  fail-on-breaking:
+    description: "Fail the CI step with exit code 1 if breaking changes are detected"
+    required: false
+    default: "true"
+
+outputs:
+  is-breaking:
+    description: "True if breaking changes were detected, false otherwise"
+    value: ${{ steps.diff.outputs.is_breaking }}
+  breaking-count:
+    description: "Number of breaking changes detected"
+    value: ${{ steps.diff.outputs.breaking_count }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Fetch base branch
+      shell: bash
+      run: |
+        git fetch origin ${{ inputs.base-ref }}:base_ref_branch --depth=1 || true
+
+    - name: Run ContractGuard Diff
+      id: diff
+      shell: bash
+      run: |
+        python -m contract_guard.cli git-diff \
+          --spec "${{ inputs.spec-path }}" \
+          --base-ref "base_ref_branch" \
+          --format markdown \
+          --output contract_guard_report.md || EXIT_CODE=$?
+
+        if [ -f contract_guard_report.md ]; then
+          cat contract_guard_report.md >> $GITHUB_STEP_SUMMARY
+        fi
+
+        if [ "${{ inputs.fail-on-breaking }}" = "true" ] && [ "$EXIT_CODE" = "1" ]; then
+          echo "::error::ContractGuard detected breaking API changes! See step summary for details."
+          exit 1
+        fi
